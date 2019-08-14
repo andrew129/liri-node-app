@@ -48,15 +48,15 @@ function inquire() {
     }
 
     if (command === 'do-what-it-says') {
-        reader()
+       reader() 
     }
 }
 //runs the bandsintown api//
 function bandsInTown(target) {
     // let artist = process.argv[3];
-    var concertQueryUrl = "https://rest.bandsintown.com/artists/" + target.artist + "/events?app_id=codingbootcamp"
+    var queryUrl = "https://rest.bandsintown.com/artists/" + target.artist + "/events?app_id=codingbootcamp"
     console.log()
-    axios.get(concertQueryUrl).then(
+    axios.get(queryUrl).then(
         function(concerts) {
         for (let i = 0; i < concerts.data.length; i++) {
             console.log("------------------------------");
@@ -84,16 +84,13 @@ function bandsInTown(target) {
 }
 
 function spotSong(target) {
-    console.log('the song', target.song);
-    let spotify = new Spotify({
-        id: process.env.SPOTIFY_ID,
-        secret: process.env.SPOTIFY_SECRET
-    });
-
+    let spotify = new Spotify(keys.spotify)
+    if (!target.song) {
+        console.log('The Sign')
+    }
       spotify.search({type: "track", query: target.song}).then((data) => {
-          console.log('data', data.tracks.items);
-        let results = data;
-          for (let i = 0; i < 5; i++) {
+        let results = data.tracks.items;
+          for (let i = 0; i < 2; i++) {
           console.log("--------------------------------------------------------------------------------");
           console.log("Artist: " + results[i].artists[0].name);
           console.log("Song: " + results[i].name);
@@ -101,7 +98,7 @@ function spotSong(target) {
           console.log("Album: " + results[i].album.name);
         }
       }).catch((err) => {
-           // console.log('the error', err.response);
+           console.log('the error', err.response);
       })
 }
 
@@ -110,6 +107,7 @@ function findMovie(target) {
 
     axios.get(queryUrl).then(
         function(response) {
+        console.log("--------------------------------------------------------------------------------");
         console.log('Name: ' + JSON.stringify(target.movie))
         console.log('Release Year: ' + JSON.stringify(response.data.Year))
         console.log('IMDB Rating: ' + JSON.stringify(response.data.imdbRating))
@@ -117,6 +115,7 @@ function findMovie(target) {
         console.log('Language: ' + JSON.stringify(response.data.Language))
         console.log('Plot: ' + JSON.stringify(response.data.Plot))
         console.log('Actors: ' + JSON.stringify(response.data.Actors))
+        console.log("--------------------------------------------------------------------------------");
     })
         .catch(function(error) {
         if (error.response) {
@@ -135,13 +134,32 @@ function findMovie(target) {
     });
 }
 
-function reader() {
+function reader(target) {
     fs.readFile("random.txt", "utf8", function(error, data) {
+
+        var output = data.split("");
+        let search = output[0]
+        let term = output[1]
+
         if (error) {
             return console.log(error);
         }
+        
+        else if (search === 'concert-this') {
+            bandsInTown(term)
+        }
+
+        else if (search === 'spotify-this-song') {
+            spotSong(term)
+        }
+
+        else if (search === 'movie-this') {
+            findMovie(term)
+        }
 
         
+        console.log()
+
     })
 }
 
